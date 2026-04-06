@@ -284,7 +284,7 @@ export default function MobileSimplePage() {
               <p className="text-gray-600 text-sm mb-3">AI will analyze and identify dishes</p>
               
               {!previewUrl ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center relative">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-700 mb-2">Tap to upload photo</p>
                   <p className="text-gray-500 text-sm">JPEG, PNG up to 5MB</p>
@@ -292,7 +292,7 @@ export default function MobileSimplePage() {
                     type="file"
                     accept="image/*"
                     onChange={handleFileSelect}
-                    className="absolute inset-0 w-full h-full opacity-0"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
               ) : (
