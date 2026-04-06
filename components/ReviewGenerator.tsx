@@ -26,7 +26,12 @@ export default function ReviewGenerator({
 
   // Generate initial reviews on component mount
   useEffect(() => {
-    generateNewReviews();
+    // Use a small timeout to ensure component is mounted
+    const timer = setTimeout(() => {
+      generateNewReviews();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [businessType]);
 
   // Update word count when selected review changes

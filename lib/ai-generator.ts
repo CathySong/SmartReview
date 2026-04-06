@@ -57,6 +57,7 @@ export class ReviewGenerator {
   ): Promise<string> {
     // If OpenAI is not available, use fallback reviews
     if (!this.openai) {
+      console.log('OpenAI not available, using fallback review');
       return this.getRandomFallbackReview();
     }
 
@@ -64,6 +65,8 @@ export class ReviewGenerator {
       const category = this.getRandomCategory();
       const prompt = this.buildPrompt(businessType, category, dishName, photoDescription);
 
+      console.log('Generating AI review with prompt:', prompt.substring(0, 100) + '...');
+      
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -83,8 +86,10 @@ export class ReviewGenerator {
       const review = completion.choices[0]?.message?.content?.trim();
       
       if (review && review.length > 15) {
+        console.log('AI review generated successfully');
         return review;
       } else {
+        console.log('AI review too short, using fallback');
         return this.getRandomFallbackReview();
       }
     } catch (error) {
