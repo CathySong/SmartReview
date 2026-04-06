@@ -9,7 +9,7 @@ import { GoogleReviewService, DEFAULT_BUSINESS } from '@/lib/google-review';
 
 export default function Home() {
   const [currentReview, setCurrentReview] = useState<string>('');
-  const [businessType, setBusinessType] = useState('art studio');
+  const [businessType, setBusinessType] = useState('restaurant');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewUrl, setReviewUrl] = useState<string>('');
 
@@ -98,11 +98,10 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          Boost Your Google Reviews with{' '}
-          <span className="text-primary-600">AI-Powered</span> Ease
+          Boost <span className="text-primary-600">Xie Bao Crab House</span> Reviews
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-          QR code scanning + AI-generated reviews + One-click submission = More 5-star reviews
+          QR code scanning + AI-generated reviews + Direct to Google Maps = More 5-star reviews
         </p>
         
         <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -153,7 +152,7 @@ export default function Home() {
           <div className="card mt-6">
             <h3 className="font-semibold text-gray-900 mb-3">Business Type</h3>
             <div className="flex flex-wrap gap-2">
-              {['restaurant', 'cafe', 'retail', 'service', 'studio', 'hotel'].map((type) => (
+              {['restaurant', 'cafe', 'seafood', 'chinese', 'asian', 'fine dining'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setBusinessType(type)}
@@ -167,6 +166,9 @@ export default function Home() {
                 </button>
               ))}
             </div>
+            <p className="text-sm text-gray-600 mt-3">
+              Current: <span className="font-medium">Xie Bao Crab House</span> - Seafood & Chinese cuisine
+            </p>
           </div>
         </div>
 
@@ -264,10 +266,10 @@ export default function Home() {
       {/* CTA Section */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Ready to Get More 5-Star Reviews?
+          Ready to Boost Xie Bao Crab House Reviews?
         </h2>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Deploy this solution in your business and watch your Google ratings soar.
+          Generate QR codes for your restaurant and watch your Google ratings soar with authentic 5-star reviews.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
@@ -275,14 +277,22 @@ export default function Home() {
             disabled={!currentReview}
             className="px-8 py-4 bg-primary-600 text-white font-bold text-lg rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
           >
-            Try Demo Now
+            Submit Review Now
           </button>
-          <a
-            href="#deploy"
-            className="px-8 py-4 bg-white border-2 border-primary-600 text-primary-600 font-bold text-lg rounded-lg hover:bg-primary-50 transition-colors"
+          <button
+            onClick={() => {
+              if (reviewUrl) {
+                const qrButton = document.querySelector('button[onclick*="handleDownloadQR"]');
+                if (qrButton && qrButton instanceof HTMLElement) {
+                  qrButton.click();
+                }
+              }
+            }}
+            disabled={!reviewUrl}
+            className="px-8 py-4 bg-white border-2 border-primary-600 text-primary-600 font-bold text-lg rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50"
           >
-            Deploy to Your Business
-          </a>
+            Download QR Code
+          </button>
         </div>
       </div>
     </div>

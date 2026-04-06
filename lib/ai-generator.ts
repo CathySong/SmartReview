@@ -1,36 +1,37 @@
 import OpenAI from 'openai';
 
-// Fallback reviews if OpenAI API is not available
+// Fallback reviews for Xie Bao Crab House (if OpenAI API is not available)
 const FALLBACK_REVIEWS = [
-  "The food was absolutely delicious! Fresh ingredients and perfect seasoning. The atmosphere was cozy and welcoming, and the service was attentive without being intrusive. Will definitely be back!",
-  "Amazing experience from start to finish. The staff was friendly and knowledgeable, the ambiance was perfect for a relaxing meal, and every dish we tried was exceptional. Highly recommend!",
-  "What a fantastic place! Great food, excellent service, and a wonderful atmosphere. The attention to detail really shows. Can't wait to visit again soon!",
-  "Exceptional quality and service. The food was cooked to perfection, the presentation was beautiful, and the staff made us feel right at home. A truly memorable dining experience.",
-  "Loved everything about this place! The menu had great variety, everything we ordered was delicious, and the service was prompt and friendly. The ambiance was perfect too!",
-  "Outstanding in every way. From the moment we walked in, we were treated like family. The food was incredible, the drinks were creative, and the overall experience was top-notch.",
-  "A hidden gem! The food was fresh and flavorful, the service was impeccable, and the atmosphere was just right. We'll definitely be regulars from now on.",
-  "Perfect spot for a great meal. The staff went above and beyond to make our visit special. Every dish was a delight and the overall experience was wonderful.",
-  "Absolutely loved our visit! The food was creative and delicious, the service was friendly and efficient, and the ambiance was warm and inviting. Highly recommended!",
-  "One of the best dining experiences we've had. Everything from the appetizers to dessert was exceptional. The staff was attentive and the atmosphere was lovely."
+  "The crab was absolutely incredible - fresh, perfectly seasoned, and cooked to perfection. The service was attentive and the atmosphere was lively yet comfortable. Will definitely return!",
+  "Amazing seafood experience! The crab dishes were outstanding, the staff was knowledgeable about the menu, and the restaurant had a great vibe. Highly recommend the garlic crab!",
+  "What a fantastic crab house! The seafood was fresh and flavorful, the service was excellent, and the portions were generous. Can't wait to come back for more!",
+  "Exceptional Chinese seafood restaurant. Every dish we tried was delicious, especially the crab preparations. The staff made us feel welcome and the overall experience was memorable.",
+  "Loved everything about Xie Bao Crab House! The crab was cooked perfectly, the sauces were amazing, and the service was friendly and efficient. Great spot for seafood lovers!",
+  "Outstanding crab house! From the moment we walked in, the aroma was incredible. The food lived up to the smell - fresh, flavorful, and beautifully presented. Top-notch experience!",
+  "A hidden gem for seafood! The crab was fresh and delicious, the service was impeccable, and the restaurant had a great atmosphere. We'll definitely be regulars!",
+  "Perfect spot for crab lovers! The staff went above and beyond to make our visit special. Every crab dish was a delight - fresh, flavorful, and perfectly cooked.",
+  "Absolutely loved our dining experience! The seafood was fresh and creative, the service was friendly, and the ambiance was perfect for a family meal. Highly recommended!",
+  "One of the best seafood restaurants we've tried. The crab was exceptional, the other dishes were equally delicious, and the service made the experience wonderful."
 ];
 
-// Categories for AI to focus on
+// Categories for AI to focus on (restaurant specific)
 const REVIEW_CATEGORIES = [
-  'food quality',
-  'service experience', 
-  'atmosphere/ambiance',
-  'value for money',
-  'overall experience'
+  'food quality and freshness',
+  'seafood preparation and taste', 
+  'service experience and attentiveness',
+  'restaurant atmosphere and cleanliness',
+  'value for money and portion sizes',
+  'overall dining experience'
 ];
 
-// Business types for context
+// Business types for context (restaurant focused)
 const BUSINESS_TYPES = [
-  'restaurant',
-  'cafe',
-  'retail store',
-  'service business',
-  'hotel',
-  'attraction'
+  'seafood restaurant',
+  'chinese restaurant',
+  'crab house',
+  'asian cuisine',
+  'fine dining',
+  'casual dining'
 ];
 
 export class ReviewGenerator {
@@ -85,17 +86,17 @@ export class ReviewGenerator {
   }
 
   private buildPrompt(businessType: string, category: string): string {
-    return `Generate a natural, authentic Google review for a ${businessType}. 
+    return `Generate a natural, authentic Google review for Xie Bao Crab House, a seafood and Chinese restaurant. 
     Focus on: ${category}.
     Requirements:
     - 15-25 words maximum
-    - Sound like real customer feedback
-    - Mention specific positive aspects
+    - Sound like real customer feedback from a seafood restaurant
+    - Mention specific dishes like crab, seafood, or Chinese cuisine
     - Avoid generic phrases like "great service" or "good food"
-    - Include personal experience details
-    - End with intention to return or recommend
+    - Include personal experience details about the dining experience
+    - End with intention to return or recommend to friends
     
-    Example format: "The [specific dish] was incredible - perfectly cooked and full of flavor. The staff was attentive and the atmosphere was cozy. Will definitely be back!"`;
+    Example format: "The garlic crab was incredible - fresh, perfectly seasoned, and full of flavor. The staff was attentive and the restaurant had a great atmosphere. Will definitely be back!"`;
   }
 
   private getRandomCategory(): string {

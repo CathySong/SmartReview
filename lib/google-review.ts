@@ -20,23 +20,23 @@ export interface ReviewData {
 
 export class GoogleReviewService {
   /**
-   * Generate Google Review URL
-   * This creates a pre-filled review link that users can click to submit
+   * Generate Google Review URL for Xie Bao Crab House
+   * Uses the specific Google Maps URL provided
    */
   static generateReviewUrl(data: ReviewData): string {
-    const { rating, reviewText, placeId } = data;
+    const { rating, reviewText } = data;
     
     // URL encode the review text
     const encodedReview = encodeURIComponent(reviewText);
     
-    // Google Maps review URL format
-    // Note: This opens the Google Maps app or website with pre-filled review
-    const baseUrl = `https://search.google.com/local/writereview`;
+    // Use the specific Xie Bao Crab House Google Maps URL
+    // This is the exact URL that will open when users scan QR code
+    const baseUrl = `https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq`;
     
-    // Construct query parameters
+    // Add review parameters to the URL
     const params = new URLSearchParams({
-      placeid: placeId,
-      hl: 'en', // Language
+      authuser: '0',
+      entry: 'ttu',
       review: encodedReview,
       rating: rating.toString(),
     });
@@ -45,15 +45,10 @@ export class GoogleReviewService {
   }
 
   /**
-   * Generate alternative URL for Google Maps
+   * Generate alternative URL for Google Maps (simplified version)
    */
   static generateMapsReviewUrl(data: ReviewData): string {
-    const { rating, reviewText, placeId } = data;
-    
-    const encodedReview = encodeURIComponent(reviewText);
-    
-    // Alternative Google Maps URL
-    return `https://www.google.com/maps/place/?q=place_id:${placeId}&review=${encodedReview}&rating=${rating}`;
+    return this.generateReviewUrl(data);
   }
 
   /**
@@ -157,10 +152,10 @@ export class GoogleReviewService {
   }
 }
 
-// Example business configuration
+// Business configuration for Xie Bao Crab House
 export const DEFAULT_BUSINESS = {
-  name: 'Luna Art Studio',
-  placeId: process.env.GOOGLE_PLACE_ID || 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-  type: 'art studio',
-  categories: ['art classes', 'creative workshops', 'summer camps']
+  name: 'Xie Bao Crab House',
+  placeId: process.env.GOOGLE_PLACE_ID || 'ChIJN1t_tDeuEmsRUsoyG83frY4', // Need actual Place ID for Xie Bao Crab House
+  type: 'restaurant',
+  categories: ['seafood restaurant', 'crab house', 'chinese cuisine']
 };

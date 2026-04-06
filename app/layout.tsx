@@ -6,9 +6,9 @@ import { Toaster } from 'react-hot-toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'QuickReview - AI-Powered Google Review Generator',
-  description: 'Scan QR code, get AI-generated review, submit 5-star Google review in one click',
-  keywords: ['Google Reviews', 'QR Code', 'AI Review Generator', 'Customer Feedback'],
+  title: 'Xie Bao Crab House - Google Review Generator',
+  description: 'Scan QR code for Xie Bao Crab House, get AI-generated review, submit 5-star Google review directly',
+  keywords: ['Xie Bao Crab House', 'Google Reviews', 'QR Code', 'Seafood Restaurant', 'Chinese Cuisine'],
 }
 
 export default function RootLayout({
@@ -28,11 +28,11 @@ export default function RootLayout({
                     <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                       <span className="text-white font-bold">QR</span>
                     </div>
-                    <span className="text-xl font-bold text-gray-900">QuickReview</span>
+                    <span className="text-xl font-bold text-gray-900">Xie Bao Crab House</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">AI-Powered Google Reviews</span>
+                  <span className="text-sm text-gray-600">Google Review Generator</span>
                 </div>
               </div>
             </div>
@@ -45,8 +45,8 @@ export default function RootLayout({
           <footer className="bg-white border-t border-gray-200 mt-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <div className="text-center text-gray-600 text-sm">
-                <p>© 2024 QuickReview. All rights reserved.</p>
-                <p className="mt-2">This tool helps businesses collect authentic customer reviews while maintaining regulatory compliance.</p>
+                <p>© 2024 Xie Bao Crab House. All rights reserved.</p>
+                <p className="mt-2">Scan QR code to leave a Google review for our seafood restaurant.</p>
               </div>
             </div>
           </footer>
