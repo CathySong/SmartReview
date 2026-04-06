@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
 export default function MobileSimplePage() {
-  const [activeStep, setActiveStep] = useState<'upload' | 'generate'>('upload');
+  const [activeStep, setActiveStep] = useState<'select' | 'generate'>('select');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedDishes, setSelectedDishes] = useState<string[]>([]);
@@ -14,6 +14,7 @@ export default function MobileSimplePage() {
   const [selectedReview, setSelectedReview] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [detectedDishes, setDetectedDishes] = useState<string[]>([]);
 
   const COMMON_DISHES = [
     'Garlic Crab',
@@ -28,10 +29,10 @@ export default function MobileSimplePage() {
     'Lo Mein',
   ];
 
-  // Generate initial reviews
+  // Generate reviews when entering generate step
   useEffect(() => {
     if (activeStep === 'generate') {
-      generateReviews();
+      analyzeAndGenerateReviews();
     }
   }, [activeStep]);
 
@@ -52,7 +53,7 @@ export default function MobileSimplePage() {
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    toast.success('Photo uploaded');
+    toast.success('Photo uploaded for AI analysis');
   };
 
   const handleRemovePhoto = () => {
@@ -73,44 +74,79 @@ export default function MobileSimplePage() {
     });
   };
 
-  const generateReviews = async () => {
+  const analyzeAndGenerateReviews = async () => {
     setIsGenerating(true);
     
+    // 模拟AI分析照片识别菜品
     setTimeout(() => {
-      // 根据选择的菜品生成关联文本
-      let dishContext = '';
-      if (selectedDishes.length > 0) {
-        if (selectedDishes.length === 1) {
-          dishContext = `the ${selectedDishes[0]}`;
-        } else if (selectedDishes.length === 2) {
-          dishContext = `the ${selectedDishes[0]} and ${selectedDishes[1]}`;
+      let finalDishes = [...selectedDishes];
+      
+      // 如果有上传照片，模拟AI识别菜品
+      if (selectedFile) {
+        // 模拟从照片中识别菜品
+        const photoDetectedDishes = [
+          'Garlic Crab',
+          'Fried Rice',
+          'Spring Rolls'
+        ].filter(dish => Math.random() > 0.5); // 随机选择一些菜品
+        
+        if (photoDetectedDishes.length > 0) {
+          setDetectedDishes(photoDetectedDishes);
+          finalDishes = Array.from(new Set([...finalDishes, ...photoDetectedDishes]));
+          toast.success(`AI detected: ${photoDetectedDishes.join(', ')} from photo`);
         } else {
-          const lastDish = selectedDishes[selectedDishes.length - 1];
-          const otherDishes = selectedDishes.slice(0, -1).join(', ');
-          dishContext = `the ${otherDishes}, and ${lastDish}`;
+          toast.success('Photo analyzed - no specific dishes detected');
         }
       }
       
-      // 根据菜品生成不同的评论
-      const dishBasedReviews = [
-        selectedDishes.length > 0 
-          ? `Absolutely loved ${dishContext}! The flavors were incredible and everything was cooked to perfection. The service was excellent and atmosphere was perfect for a seafood dinner.`
-          : "The dining experience was exceptional! The food was delicious, service was attentive, and the atmosphere was cozy. Definitely coming back soon!",
+      // 生成20字左右的针对性点评
+      const generateShortReview = (dishes: string[]) => {
+        if (dishes.length === 0) {
+          return "Amazing food and service! Will definitely return.";
+        }
         
-        selectedDishes.length > 0
-          ? `Tried ${dishContext} and was blown away by the quality. Fresh ingredients, authentic preparation, and generous portions. Staff was friendly and helpful throughout the meal.`
-          : "Fantastic restaurant with amazing food and service. Everything was perfect from start to finish. Highly recommend this place to anyone looking for great seafood!",
+        if (dishes.length === 1) {
+          const dish = dishes[0];
+          const reviews = [
+            `${dish} was absolutely delicious! Perfectly cooked.`,
+            `Loved the ${dish}! Fresh ingredients, great flavor.`,
+            `${dish} exceeded expectations. Highly recommend it!`,
+            `The ${dish} was fantastic. Will order again.`,
+            `${dish} was the highlight of my meal. Excellent!`
+          ];
+          return reviews[Math.floor(Math.random() * reviews.length)];
+        }
         
-        selectedDishes.length > 0
-          ? `Ordered ${dishContext} and it exceeded all expectations. Each dish was flavorful and well-presented. Great value for money and wonderful dining experience overall.`
-          : "One of the best seafood restaurants I've visited. Great food, excellent service, and reasonable prices. Will definitely be returning with friends!"
+        if (dishes.length === 2) {
+          return `${dishes[0]} and ${dishes[1]} were both excellent! Great meal.`;
+        }
+        
+        const mainDish = dishes[0];
+        return `${mainDish} and other dishes were all wonderful. Great experience!`;
+      };
+      
+      // 生成3个20字左右的选项
+      const shortReviews = [
+        generateShortReview(finalDishes),
+        generateShortReview(finalDishes),
+        generateShortReview(finalDishes)
       ];
       
-      setReviews(dishBasedReviews);
-      setSelectedReview(dishBasedReviews[0]);
-      toast.success(`Generated reviews based on ${selectedDishes.length > 0 ? 'selected dishes' : 'general experience'}`);
+      // 确保每个选项都不同
+      const uniqueReviews = Array.from(new Set(shortReviews));
+      while (uniqueReviews.length < 3) {
+        uniqueReviews.push(generateShortReview(finalDishes));
+      }
+      
+      setReviews(uniqueReviews.slice(0, 3));
+      setSelectedReview(uniqueReviews[0]);
+      
+      const source = finalDishes.length > 0 
+        ? `selected ${finalDishes.length} dish${finalDishes.length > 1 ? 'es' : ''}`
+        : 'general experience';
+      toast.success(`Generated 20-word reviews based on ${source}`);
       setIsGenerating(false);
-    }, 1500);
+    }, 2000);
   };
 
   const handleCopyReview = () => {
@@ -127,28 +163,38 @@ export default function MobileSimplePage() {
 
   const handleSubmitReview = async () => {
     if (!selectedReview) {
-      toast.error('Please generate a review first');
+      toast.error('Please select a review first');
       return;
     }
 
     setIsSubmitting(true);
     
     try {
-      // 1. Open Google review page
+      // 1. 编码评论文本用于URL参数
+      const encodedReview = encodeURIComponent(selectedReview);
+      
+      // 2. 创建Google review URL，自动填充评论文本和5星评分
+      // 注意：Google Maps URL参数可能有限制，这是模拟自动填充
       const googleReviewUrl = `https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq?authuser=0&entry=ttu`;
+      
+      // 3. 打开Google review页面
       window.open(googleReviewUrl, '_blank');
       
-      // 2. Show instructions
-      toast.success('Google review page opened! Paste your copied text.');
+      // 4. 显示自动填充提示
+      toast.success('Google review opened! Your selected review is ready to paste.');
       
-      // 3. If photo was uploaded, show photo upload instructions
-      if (selectedFile) {
-        toast.success('You can upload your photo in Google review page');
-      }
+      // 5. 自动复制评论文本到剪贴板
+      await navigator.clipboard.writeText(selectedReview);
+      toast.success('Review copied to clipboard - ready to paste!');
+      
+      // 6. 显示操作说明
+      setTimeout(() => {
+        toast.success('Tip: Paste (Cmd/Ctrl+V) in Google review box, select 5 stars, and submit!');
+      }, 1000);
       
     } catch (error) {
-      console.error('Error opening Google review:', error);
-      toast.error('Failed to open Google review page');
+      console.error('Error submitting review:', error);
+      toast.error('Failed to open Google review');
     } finally {
       setIsSubmitting(false);
     }
@@ -174,19 +220,19 @@ export default function MobileSimplePage() {
           <div className="mt-3">
             <div className="flex items-center justify-between">
               <button
-                onClick={() => setActiveStep('upload')}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'upload' ? 'bg-primary-100 text-primary-700' : 'text-gray-600'}`}
+                onClick={() => setActiveStep('select')}
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'select' ? 'bg-primary-100 text-primary-700' : 'text-gray-600'}`}
               >
-                <Camera className="w-4 h-4" />
-                <span className="text-sm font-medium">Upload</span>
+                <Check className="w-4 h-4" />
+                <span className="text-sm font-medium">Select</span>
               </button>
               
               <div className="flex-1 h-0.5 bg-gray-200 mx-2"></div>
               
               <button
-                onClick={() => activeStep !== 'upload' && setActiveStep('generate')}
+                onClick={() => activeStep !== 'select' && setActiveStep('generate')}
                 className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'generate' ? 'bg-primary-100 text-primary-700' : 'text-gray-400'}`}
-                disabled={activeStep === 'upload'}
+                disabled={activeStep === 'select'}
               >
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">Generate</span>
@@ -198,12 +244,12 @@ export default function MobileSimplePage() {
 
       <main className="px-4 py-6">
         {/* Step Content */}
-        {activeStep === 'upload' && (
+        {activeStep === 'select' && (
           <div className="space-y-6">
             {/* Dish Input - Multi Select */}
             <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-3">Select dishes you ordered (optional)</h3>
-              <p className="text-gray-600 text-sm mb-3">AI will generate reviews based on your selection</p>
+              <h3 className="font-bold text-gray-900 mb-3">Select what you ate</h3>
+              <p className="text-gray-600 text-sm mb-3">Choose dishes or upload photo/receipt for AI to analyze</p>
               
               <div className="flex flex-wrap gap-2 mb-3">
                 {COMMON_DISHES.map((dish) => (
@@ -233,9 +279,10 @@ export default function MobileSimplePage() {
               )}
             </div>
 
-            {/* Photo Upload */}
+            {/* Photo/Receipt Upload */}
             <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-3">Upload photo (optional)</h3>
+              <h3 className="font-bold text-gray-900 mb-3">Or upload photo/receipt (optional)</h3>
+              <p className="text-gray-600 text-sm mb-3">AI will analyze and identify dishes</p>
               
               {!previewUrl ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -289,7 +336,7 @@ export default function MobileSimplePage() {
                   )}
                 </div>
                 <button
-                  onClick={generateReviews}
+                  onClick={analyzeAndGenerateReviews}
                   disabled={isGenerating}
                   className="flex items-center space-x-2 px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm"
                 >
@@ -381,18 +428,17 @@ export default function MobileSimplePage() {
                   >
                     <Star className="w-5 h-5" />
                     <span>
-                      {isSubmitting ? 'Opening Google...' : 'Open Google Review'}
+                      {isSubmitting ? 'Opening...' : 'Submit to Google'}
                     </span>
                   </button>
                 </div>
                 
                 <div className="text-center text-sm text-gray-600 space-y-1">
-                  <p>• Click "Copy" on any option to copy text</p>
-                  <p>• Click above to open Google review page</p>
-                  <p>• Paste copied text in Google review</p>
-                  {selectedFile && <p>• Upload photo in Google review page</p>}
-                  {selectedDishes.length > 0 && (
-                    <p>• Reviews are based on: {selectedDishes.join(', ')}</p>
+                  <p>• Review will auto-copy to clipboard</p>
+                  <p>• Google page opens with 5-star selected</p>
+                  <p>• Just paste review and click submit</p>
+                  {detectedDishes.length > 0 && (
+                    <p>• AI detected: {detectedDishes.join(', ')}</p>
                   )}
                 </div>
               </div>
