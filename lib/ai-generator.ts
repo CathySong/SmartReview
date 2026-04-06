@@ -39,14 +39,26 @@ export class ReviewGenerator {
 
   constructor(apiKey?: string) {
     // Use provided API key or environment variable
+    // In Vercel, environment variables are available at runtime
     const key = apiKey || process.env.OPENAI_API_KEY;
+    
+    console.log('OpenAI API Key check:', {
+      hasProvidedKey: !!apiKey,
+      hasEnvKey: !!process.env.OPENAI_API_KEY,
+      envKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+      envKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 10) || 'none',
+      isVercel: !!process.env.VERCEL,
+      nodeEnv: process.env.NODE_ENV
+    });
     
     if (key && key.startsWith('sk-')) {
       this.openai = new OpenAI({
         apiKey: key,
       });
+      console.log('OpenAI client initialized successfully');
     } else {
-      console.warn('OpenAI API key not configured or invalid');
+      console.warn('OpenAI API key not configured or invalid. Using fallback reviews.');
+      console.warn('For Vercel deployment, make sure OPENAI_API_KEY is set in Environment Variables.');
     }
   }
 
@@ -57,7 +69,9 @@ export class ReviewGenerator {
   ): Promise<string> {
     // If OpenAI is not available, use fallback reviews
     if (!this.openai) {
-      console.log('OpenAI not available, using fallback review');
+      console.log('OpenAI client not initialized, using fallback review');
+      console.log('This usually means OPENAI_API_KEY is not set in environment variables.');
+      console.log('For Vercel: Check Environment Variables in project settings.');
       return this.getRandomFallbackReview();
     }
 
@@ -65,7 +79,13 @@ export class ReviewGenerator {
       const category = this.getRandomCategory();
       const prompt = this.buildPrompt(businessType, category, dishName, photoDescription);
 
-      console.log('Generating AI review with prompt:', prompt.substring(0, 100) + '...');
+      console.log('Generating AI review with context:', {
+        businessType,
+        dishName: dishName || 'none',
+        photoDescription: photoDescription || 'none',
+        category,
+        promptLength: prompt.length
+      });
       
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -86,14 +106,23 @@ export class ReviewGenerator {
       const review = completion.choices[0]?.message?.content?.trim();
       
       if (review && review.length > 15) {
-        console.log('AI review generated successfully');
+        console.log('AI review generated successfully:', {
+          wordCount: review.trim().split(/\s+/).length,
+          preview: review.substring(0, 50) + '...'
+        });
         return review;
       } else {
-        console.log('AI review too short, using fallback');
+        console.log('AI review too short or empty, using fallback');
         return this.getRandomFallbackReview();
       }
-    } catch (error) {
-      console.error('Error generating AI review:', error);
+    } catch (error: any) {
+      console.error('Error generating AI review:', {
+        error: error.message,
+        code: error.code,
+        type: error.type,
+        status: error.status
+      });
+      console.log('Using fallback review due to API error');
       return this.getRandomFallbackReview();
     }
   }
@@ -144,10 +173,16 @@ export class ReviewGenerator {
     dishName?: string,
     photoDescription?: string
   ): Promise<string[]> {
-    const promises = Array(count).fill(null).map(() => 
-      this.generateReview(businessType, dishName, photoDescription)
-    );
-    return Promise.all(promises);
+    try {
+      const promises = Array(count).fill(null).map(() => 
+        this.generateReview(businessType, dishName, photoDescription)
+      );
+      return await Promise.all(promises);
+    } catch (error) {
+      console.error('Error generating review options:', error);
+      // Return fallback reviews if API fails
+      return FALLBACK_REVIEWS.slice(0, count);
+    }
   }
 }
 

@@ -34,6 +34,14 @@ export default function ReviewGenerator({
     return () => clearTimeout(timer);
   }, [businessType]);
 
+  // Initialize with empty reviews for better UX
+  useEffect(() => {
+    if (reviews.length === 0) {
+      // Show loading state
+      setReviews(['Loading review options...', 'Please wait...', 'Generating AI reviews...']);
+    }
+  }, []);
+
   // Update word count when selected review changes
   useEffect(() => {
     if (selectedReview) {
