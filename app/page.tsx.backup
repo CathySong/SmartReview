@@ -247,12 +247,11 @@ export default function Home() {
             </p>
           </div>
         </div>
-        </div>
 
         {/* Right Column: QR Code & Submission */}
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Step 3: Submit Your Review</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Step 2: Submit Your Review</h2>
             <p className="text-gray-600">
               Scan the QR code or click the button to submit your 5-star review directly to Google.
             </p>

@@ -7,11 +7,15 @@ import { reviewGenerator } from '@/lib/ai-generator';
 
 interface ReviewGeneratorProps {
   businessType?: string;
+  dishName?: string;
+  photoDescription?: string;
   onReviewGenerated?: (review: string) => void;
 }
 
 export default function ReviewGenerator({ 
-  businessType = 'restaurant',
+  businessType = 'seafood restaurant',
+  dishName = '',
+  photoDescription = '',
   onReviewGenerated 
 }: ReviewGeneratorProps) {
   const [reviews, setReviews] = useState<string[]>([]);
@@ -36,7 +40,12 @@ export default function ReviewGenerator({
   const generateNewReviews = async () => {
     setIsGenerating(true);
     try {
-      const newReviews = await reviewGenerator.generateReviewOptions(businessType, 3);
+      const newReviews = await reviewGenerator.generateReviewOptions(
+        businessType, 
+        3,
+        dishName,
+        photoDescription
+      );
       setReviews(newReviews);
       setSelectedReview(newReviews[0]);
       
@@ -44,7 +53,11 @@ export default function ReviewGenerator({
         onReviewGenerated(newReviews[0]);
       }
       
-      toast.success('Generated new review options!');
+      const contextMessage = dishName || photoDescription 
+        ? ` based on ${dishName ? `"${dishName}"` : ''}${dishName && photoDescription ? ' and ' : ''}${photoDescription ? 'photo' : ''}`
+        : '';
+      
+      toast.success(`Generated new review options${contextMessage}!`);
     } catch (error) {
       console.error('Error generating reviews:', error);
       toast.error('Failed to generate reviews');
@@ -76,7 +89,7 @@ export default function ReviewGenerator({
 
   const handleRegenerateSingle = async (index: number) => {
     try {
-      const newReview = await reviewGenerator.generateReview(businessType);
+      const newReview = await reviewGenerator.generateReview(businessType, dishName, photoDescription);
       const updatedReviews = [...reviews];
       updatedReviews[index] = newReview;
       setReviews(updatedReviews);

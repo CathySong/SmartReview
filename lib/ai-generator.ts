@@ -37,16 +37,24 @@ const BUSINESS_TYPES = [
 export class ReviewGenerator {
   private openai: OpenAI | null = null;
 
-  constructor() {
-    // Initialize OpenAI only if API key is available
-    if (process.env.OPENAI_API_KEY) {
+  constructor(apiKey?: string) {
+    // Use provided API key or environment variable
+    const key = apiKey || process.env.OPENAI_API_KEY;
+    
+    if (key && key.startsWith('sk-')) {
       this.openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: key,
       });
+    } else {
+      console.warn('OpenAI API key not configured or invalid');
     }
   }
 
-  async generateReview(businessType: string = 'restaurant'): Promise<string> {
+  async generateReview(
+    businessType: string = 'seafood restaurant',
+    dishName?: string,
+    photoDescription?: string
+  ): Promise<string> {
     // If OpenAI is not available, use fallback reviews
     if (!this.openai) {
       return this.getRandomFallbackReview();
@@ -54,27 +62,27 @@ export class ReviewGenerator {
 
     try {
       const category = this.getRandomCategory();
-      const prompt = this.buildPrompt(businessType, category);
+      const prompt = this.buildPrompt(businessType, category, dishName, photoDescription);
 
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that generates authentic, natural-sounding Google reviews. Reviews should be 15-25 words, sound like real customer feedback, and avoid repetitive patterns."
+            content: "You are a helpful assistant that generates authentic, natural-sounding Google reviews for Xie Bao Crab House. Reviews should be 18-22 words, sound like real customer feedback, mention specific dishes or experiences, and avoid repetitive patterns."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 60,
-        temperature: 0.8, // Higher temperature for more varied responses
+        max_tokens: 50,
+        temperature: 0.7, // Slightly lower temperature for more consistent quality
       });
 
       const review = completion.choices[0]?.message?.content?.trim();
       
-      if (review && review.length > 10) {
+      if (review && review.length > 15) {
         return review;
       } else {
         return this.getRandomFallbackReview();
@@ -85,16 +93,33 @@ export class ReviewGenerator {
     }
   }
 
-  private buildPrompt(businessType: string, category: string): string {
+  private buildPrompt(
+    businessType: string, 
+    category: string,
+    dishName?: string,
+    photoDescription?: string
+  ): string {
+    let context = '';
+    
+    if (dishName) {
+      context += `The customer ordered: ${dishName}. `;
+    }
+    
+    if (photoDescription) {
+      context += `Based on the photo showing: ${photoDescription}. `;
+    }
+    
     return `Generate a natural, authentic Google review for Xie Bao Crab House, a seafood and Chinese restaurant. 
+    ${context}
     Focus on: ${category}.
+    
     Requirements:
-    - 15-25 words maximum
+    - 18-22 words exactly
     - Sound like real customer feedback from a seafood restaurant
     - Mention specific dishes like crab, seafood, or Chinese cuisine
+    - Include personal experience details
     - Avoid generic phrases like "great service" or "good food"
-    - Include personal experience details about the dining experience
-    - End with intention to return or recommend to friends
+    - End with intention to return or recommend
     
     Example format: "The garlic crab was incredible - fresh, perfectly seasoned, and full of flavor. The staff was attentive and the restaurant had a great atmosphere. Will definitely be back!"`;
   }
@@ -108,8 +133,15 @@ export class ReviewGenerator {
   }
 
   // Generate multiple review options for user to choose from
-  async generateReviewOptions(businessType: string = 'restaurant', count: number = 3): Promise<string[]> {
-    const promises = Array(count).fill(null).map(() => this.generateReview(businessType));
+  async generateReviewOptions(
+    businessType: string = 'seafood restaurant', 
+    count: number = 3,
+    dishName?: string,
+    photoDescription?: string
+  ): Promise<string[]> {
+    const promises = Array(count).fill(null).map(() => 
+      this.generateReview(businessType, dishName, photoDescription)
+    );
     return Promise.all(promises);
   }
 }
