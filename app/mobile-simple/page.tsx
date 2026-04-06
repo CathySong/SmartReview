@@ -230,9 +230,8 @@ export default function MobileSimplePage() {
               <div className="flex-1 h-0.5 bg-gray-200 mx-2"></div>
               
               <button
-                onClick={() => activeStep !== 'select' && setActiveStep('generate')}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'generate' ? 'bg-primary-100 text-primary-700' : 'text-gray-400'}`}
-                disabled={activeStep === 'select'}
+                onClick={() => setActiveStep('generate')}
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'generate' ? 'bg-primary-100 text-primary-700' : 'text-gray-600'}`}
               >
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">Generate</span>
