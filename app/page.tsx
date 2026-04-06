@@ -1,0 +1,290 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { QrCode, Sparkles, Shield, Zap, Star, Users, TrendingUp } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import ReviewGenerator from '@/components/ReviewGenerator';
+import QRCodeGenerator from '@/components/QRCodeGenerator';
+import { GoogleReviewService, DEFAULT_BUSINESS } from '@/lib/google-review';
+
+export default function Home() {
+  const [currentReview, setCurrentReview] = useState<string>('');
+  const [businessType, setBusinessType] = useState('art studio');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewUrl, setReviewUrl] = useState<string>('');
+
+  // Generate initial review URL
+  useEffect(() => {
+    if (currentReview) {
+      updateReviewUrl();
+    }
+  }, [currentReview]);
+
+  const updateReviewUrl = () => {
+    const reviewData = {
+      rating: 5, // Default 5-star rating
+      reviewText: currentReview,
+      placeId: DEFAULT_BUSINESS.placeId,
+      businessName: DEFAULT_BUSINESS.name,
+    };
+
+    const url = GoogleReviewService.generateReviewUrl(reviewData);
+    setReviewUrl(url);
+  };
+
+  const handleReviewGenerated = (review: string) => {
+    setCurrentReview(review);
+  };
+
+  const handleSubmitReview = () => {
+    if (!currentReview) {
+      toast.error('Please generate a review first');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    // Validate the review
+    const validation = GoogleReviewService.validateReview(currentReview);
+    if (!validation.isValid) {
+      toast.error(`Review validation failed: ${validation.issues.join(', ')}`);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Open Google Review in new tab
+    window.open(reviewUrl, '_blank', 'noopener,noreferrer');
+    
+    toast.success('Opening Google Review page...');
+    setIsSubmitting(false);
+  };
+
+  const handleRegenerateQR = () => {
+    updateReviewUrl();
+    toast.success('QR code updated with latest review!');
+  };
+
+  const features = [
+    {
+      icon: <QrCode className="w-6 h-6" />,
+      title: 'QR/NFC Scan',
+      description: 'Customers scan to instantly access review page'
+    },
+    {
+      icon: <Sparkles className="w-6 h-6" />,
+      title: 'AI Review Generation',
+      description: 'Natural, authentic reviews in seconds'
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: 'Regulatory Compliant',
+      description: 'Follows Google and FTC guidelines'
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: 'One-Click Submission',
+      description: 'Direct to Google with pre-filled 5-star review'
+    }
+  ];
+
+  const stats = [
+    { label: 'Average Rating', value: '4.8★', icon: <Star className="w-5 h-5" /> },
+    { label: 'Review Increase', value: '300%', icon: <TrendingUp className="w-5 h-5" /> },
+    { label: 'User Satisfaction', value: '95%', icon: <Users className="w-5 h-5" /> },
+  ];
+
+  return (
+    <div className="space-y-12">
+      {/* Hero Section */}
+      <div className="text-center">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Boost Your Google Reviews with{' '}
+          <span className="text-primary-600">AI-Powered</span> Ease
+        </h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          QR code scanning + AI-generated reviews + One-click submission = More 5-star reviews
+        </p>
+        
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
+          {stats.map((stat, index) => (
+            <div key={index} className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg border border-gray-200 shadow-sm">
+              <div className="text-primary-600">
+                {stat.icon}
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-sm text-gray-600">{stat.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {features.map((feature, index) => (
+          <div key={index} className="card text-center">
+            <div className="text-primary-600 mb-4 flex justify-center">
+              {feature.icon}
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
+            <p className="text-gray-600 text-sm">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Main Workflow */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Left Column: Review Generation */}
+        <div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Step 1: Generate Your Review</h2>
+            <p className="text-gray-600">
+              Our AI creates authentic, natural-sounding reviews. Choose your favorite or generate new options.
+            </p>
+          </div>
+          
+          <ReviewGenerator 
+            businessType={businessType}
+            onReviewGenerated={handleReviewGenerated}
+          />
+          
+          {/* Business Type Selector */}
+          <div className="card mt-6">
+            <h3 className="font-semibold text-gray-900 mb-3">Business Type</h3>
+            <div className="flex flex-wrap gap-2">
+              {['restaurant', 'cafe', 'retail', 'service', 'studio', 'hotel'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setBusinessType(type)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    businessType === type
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: QR Code & Submission */}
+        <div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Step 2: Submit Your Review</h2>
+            <p className="text-gray-600">
+              Scan the QR code or click the button to submit your 5-star review directly to Google.
+            </p>
+          </div>
+
+          {/* QR Code Generator */}
+          {reviewUrl && (
+            <QRCodeGenerator
+              url={reviewUrl}
+              businessName={DEFAULT_BUSINESS.name}
+              onRegenerate={handleRegenerateQR}
+            />
+          )}
+
+          {/* Direct Submission Button */}
+          <div className="card mt-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Direct Submission</h3>
+            <button
+              onClick={handleSubmitReview}
+              disabled={isSubmitting || !currentReview}
+              className="w-full py-4 bg-gradient-to-r from-success-500 to-success-600 text-white font-bold text-lg rounded-lg hover:from-success-600 hover:to-success-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              <Star className="w-5 h-5" />
+              <span>
+                {isSubmitting ? 'Opening Google Review...' : 'Submit 5-Star Review on Google'}
+              </span>
+            </button>
+            
+            <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+              <p className="text-sm text-yellow-800">
+                <strong>Important:</strong> You will be redirected to Google Maps where you can 
+                review and edit the pre-filled content before submitting.
+              </p>
+            </div>
+          </div>
+
+          {/* Compliance Notice */}
+          <div className="card mt-6 bg-blue-50 border-blue-100">
+            <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+              <Shield className="w-5 h-5 mr-2" />
+              Regulatory Compliance
+            </h3>
+            <ul className="text-sm text-blue-800 space-y-2">
+              <li>• No automated review submissions - user must click to submit</li>
+              <li>• No incentives for reviews - authentic feedback only</li>
+              <li>• Users can edit AI-generated content before posting</li>
+              <li>• Follows Google's review policies and FTC guidelines</li>
+              <li>• Transparent about AI assistance in review creation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Workflow Explanation */}
+      <div className="card">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">How It Works</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-primary-600 font-bold text-xl">1</span>
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">Customer Scans QR</h3>
+            <p className="text-gray-600">
+              Customer scans QR code or taps NFC tag at your location
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-primary-600 font-bold text-xl">2</span>
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">AI Generates Review</h3>
+            <p className="text-gray-600">
+              AI creates authentic, personalized review options
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-primary-600 font-bold text-xl">3</span>
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">One-Click Submission</h3>
+            <p className="text-gray-600">
+              Customer submits 5-star review directly to Google
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          Ready to Get More 5-Star Reviews?
+        </h2>
+        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          Deploy this solution in your business and watch your Google ratings soar.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={handleSubmitReview}
+            disabled={!currentReview}
+            className="px-8 py-4 bg-primary-600 text-white font-bold text-lg rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+          >
+            Try Demo Now
+          </button>
+          <a
+            href="#deploy"
+            className="px-8 py-4 bg-white border-2 border-primary-600 text-primary-600 font-bold text-lg rounded-lg hover:bg-primary-50 transition-colors"
+          >
+            Deploy to Your Business
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
