@@ -77,15 +77,38 @@ export default function MobileSimplePage() {
     setIsGenerating(true);
     
     setTimeout(() => {
-      const sampleReviews = [
-        "The crab was perfectly cooked with amazing garlic sauce. Service was quick and friendly. Definitely coming back!",
-        "Fresh seafood and authentic Chinese flavors. The atmosphere was cozy and the staff were very attentive.",
-        "Best crab house in town! Generous portions and reasonable prices. Highly recommend the garlic crab.",
+      // 根据选择的菜品生成关联文本
+      let dishContext = '';
+      if (selectedDishes.length > 0) {
+        if (selectedDishes.length === 1) {
+          dishContext = `the ${selectedDishes[0]}`;
+        } else if (selectedDishes.length === 2) {
+          dishContext = `the ${selectedDishes[0]} and ${selectedDishes[1]}`;
+        } else {
+          const lastDish = selectedDishes[selectedDishes.length - 1];
+          const otherDishes = selectedDishes.slice(0, -1).join(', ');
+          dishContext = `the ${otherDishes}, and ${lastDish}`;
+        }
+      }
+      
+      // 根据菜品生成不同的评论
+      const dishBasedReviews = [
+        selectedDishes.length > 0 
+          ? `Absolutely loved ${dishContext}! The flavors were incredible and everything was cooked to perfection. The service was excellent and atmosphere was perfect for a seafood dinner.`
+          : "The dining experience was exceptional! The food was delicious, service was attentive, and the atmosphere was cozy. Definitely coming back soon!",
+        
+        selectedDishes.length > 0
+          ? `Tried ${dishContext} and was blown away by the quality. Fresh ingredients, authentic preparation, and generous portions. Staff was friendly and helpful throughout the meal.`
+          : "Fantastic restaurant with amazing food and service. Everything was perfect from start to finish. Highly recommend this place to anyone looking for great seafood!",
+        
+        selectedDishes.length > 0
+          ? `Ordered ${dishContext} and it exceeded all expectations. Each dish was flavorful and well-presented. Great value for money and wonderful dining experience overall.`
+          : "One of the best seafood restaurants I've visited. Great food, excellent service, and reasonable prices. Will definitely be returning with friends!"
       ];
       
-      setReviews(sampleReviews);
-      setSelectedReview(sampleReviews[0]);
-      toast.success('Reviews generated');
+      setReviews(dishBasedReviews);
+      setSelectedReview(dishBasedReviews[0]);
+      toast.success(`Generated reviews based on ${selectedDishes.length > 0 ? 'selected dishes' : 'general experience'}`);
       setIsGenerating(false);
     }, 1500);
   };
@@ -111,34 +134,21 @@ export default function MobileSimplePage() {
     setIsSubmitting(true);
     
     try {
-      // 1. Copy selected text to clipboard
-      await navigator.clipboard.writeText(selectedReview);
-      
-      // 2. Prepare Google review URL with parameters
-      const reviewText = encodeURIComponent(selectedReview);
-      const dishesText = selectedDishes.length > 0 
-        ? encodeURIComponent(`Ordered: ${selectedDishes.join(', ')}. `)
-        : '';
-      
-      // 3. Create Google review URL
+      // 1. Open Google review page
       const googleReviewUrl = `https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq?authuser=0&entry=ttu`;
-      
-      // 4. Open Google review page
       window.open(googleReviewUrl, '_blank');
       
-      // 5. Show success message
-      toast.success('Review copied and Google page opened!');
+      // 2. Show instructions
+      toast.success('Google review page opened! Paste your copied text.');
       
-      // 6. If photo was uploaded, simulate photo upload to Google
+      // 3. If photo was uploaded, show photo upload instructions
       if (selectedFile) {
-        toast.success('Photo ready for upload to Google');
-        // Note: Actual photo upload to Google would require Google Photos API integration
-        // This is a simulation for the user experience
+        toast.success('You can upload your photo in Google review page');
       }
       
     } catch (error) {
-      console.error('Error submitting review:', error);
-      toast.error('Failed to submit review');
+      console.error('Error opening Google review:', error);
+      toast.error('Failed to open Google review page');
     } finally {
       setIsSubmitting(false);
     }
@@ -192,7 +202,8 @@ export default function MobileSimplePage() {
           <div className="space-y-6">
             {/* Dish Input - Multi Select */}
             <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-3">What did you order? (Select multiple)</h3>
+              <h3 className="font-bold text-gray-900 mb-3">Select dishes you ordered (optional)</h3>
+              <p className="text-gray-600 text-sm mb-3">AI will generate reviews based on your selection</p>
               
               <div className="flex flex-wrap gap-2 mb-3">
                 {COMMON_DISHES.map((dish) => (
@@ -269,14 +280,21 @@ export default function MobileSimplePage() {
           <div className="space-y-6">
             <div className="bg-white rounded-xl p-4 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900">AI Review Options</h3>
+                <div>
+                  <h3 className="font-bold text-gray-900">AI Review Options</h3>
+                  {selectedDishes.length > 0 && (
+                    <p className="text-gray-600 text-sm mt-1">
+                      Based on: {selectedDishes.join(', ')}
+                    </p>
+                  )}
+                </div>
                 <button
                   onClick={generateReviews}
                   disabled={isGenerating}
                   className="flex items-center space-x-2 px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm"
                 >
                   <RefreshCw className={`w-3 h-3 ${isGenerating ? 'animate-spin' : ''}`} />
-                  <span>New</span>
+                  <span>Refresh</span>
                 </button>
               </div>
 
@@ -294,13 +312,33 @@ export default function MobileSimplePage() {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center mb-2">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                            ))}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                              ))}
+                            </div>
+                            <span className="ml-2 text-sm text-gray-600">Option {index + 1}</span>
                           </div>
-                          <span className="ml-2 text-sm text-gray-600">Option {index + 1}</span>
+                          
+                          {/* Copy Button for each option */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(review)
+                                .then(() => {
+                                  toast.success(`Option ${index + 1} copied!`);
+                                })
+                                .catch(() => {
+                                  toast.error('Failed to copy');
+                                });
+                            }}
+                            className="flex items-center space-x-1 text-primary-600 hover:text-primary-700"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span className="text-xs">Copy</span>
+                          </button>
                         </div>
                         <p className="text-gray-800 text-sm">{review}</p>
                       </div>
@@ -343,16 +381,19 @@ export default function MobileSimplePage() {
                   >
                     <Star className="w-5 h-5" />
                     <span>
-                      {isSubmitting ? 'Submitting...' : 'Submit to Google'}
+                      {isSubmitting ? 'Opening Google...' : 'Open Google Review'}
                     </span>
                   </button>
                 </div>
                 
-                <div className="text-center text-sm text-gray-600">
-                  <p>• Review will be copied to clipboard</p>
-                  <p>• Google review page will open</p>
-                  {selectedFile && <p>• Photo ready for upload</p>}
-                  {selectedDishes.length > 0 && <p>• Selected dishes included</p>}
+                <div className="text-center text-sm text-gray-600 space-y-1">
+                  <p>• Click "Copy" on any option to copy text</p>
+                  <p>• Click above to open Google review page</p>
+                  <p>• Paste copied text in Google review</p>
+                  {selectedFile && <p>• Upload photo in Google review page</p>}
+                  {selectedDishes.length > 0 && (
+                    <p>• Reviews are based on: {selectedDishes.join(', ')}</p>
+                  )}
                 </div>
               </div>
             </div>
