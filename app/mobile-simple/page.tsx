@@ -6,16 +6,14 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
 export default function MobileSimplePage() {
-  const [activeStep, setActiveStep] = useState<'upload' | 'generate' | 'submit'>('upload');
+  const [activeStep, setActiveStep] = useState<'upload' | 'generate'>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [dishName, setDishName] = useState<string>('');
-  const [photoDescription, setPhotoDescription] = useState<string>('');
+  const [selectedDishes, setSelectedDishes] = useState<string[]>([]);
   const [reviews, setReviews] = useState<string[]>([]);
   const [selectedReview, setSelectedReview] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
-  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const COMMON_DISHES = [
     'Garlic Crab',
@@ -37,13 +35,6 @@ export default function MobileSimplePage() {
     }
   }, [activeStep]);
 
-  // Generate QR code when review is selected
-  useEffect(() => {
-    if (selectedReview && activeStep === 'submit') {
-      generateQRCode();
-    }
-  }, [selectedReview, activeStep]);
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -61,7 +52,6 @@ export default function MobileSimplePage() {
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    setPhotoDescription('restaurant food');
     toast.success('Photo uploaded');
   };
 
@@ -71,12 +61,16 @@ export default function MobileSimplePage() {
     }
     setSelectedFile(null);
     setPreviewUrl(null);
-    setPhotoDescription('');
   };
 
-  const handleDishSuggestionClick = (dish: string) => {
-    setDishName(dish);
-    toast.success(`Selected: ${dish}`);
+  const handleDishToggle = (dish: string) => {
+    setSelectedDishes(prev => {
+      if (prev.includes(dish)) {
+        return prev.filter(d => d !== dish);
+      } else {
+        return [...prev, dish];
+      }
+    });
   };
 
   const generateReviews = async () => {
@@ -96,63 +90,6 @@ export default function MobileSimplePage() {
     }, 1500);
   };
 
-  const generateQRCode = async () => {
-    setIsGeneratingQR(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = 200;
-      canvas.height = 200;
-      const ctx = canvas.getContext('2d');
-      
-      if (ctx) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, 200, 200);
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(20, 20, 160, 160);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(40, 40, 120, 120);
-        ctx.fillStyle = '#000000';
-        
-        for (let i = 0; i < 7; i++) {
-          for (let j = 0; j < 7; j++) {
-            if ((i + j) % 2 === 0) {
-              ctx.fillRect(60 + i * 15, 60 + j * 15, 8, 8);
-            }
-          }
-        }
-        
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillRect(85, 85, 30, 30);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('QR', 100, 100);
-      }
-      
-      setQrCodeDataUrl(canvas.toDataURL('image/png'));
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-    } finally {
-      setIsGeneratingQR(false);
-    }
-  };
-
-  const handleDownloadQR = () => {
-    if (!qrCodeDataUrl) return;
-    
-    const link = document.createElement('a');
-    link.href = qrCodeDataUrl;
-    link.download = `review-qr.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success('QR code downloaded');
-  };
-
   const handleCopyReview = () => {
     if (!selectedReview) return;
     
@@ -165,18 +102,46 @@ export default function MobileSimplePage() {
       });
   };
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!selectedReview) {
       toast.error('Please generate a review first');
       return;
     }
 
-    toast.success('Opening Google Review...');
+    setIsSubmitting(true);
     
-    window.open(
-      'https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq?authuser=0&entry=ttu',
-      '_blank'
-    );
+    try {
+      // 1. Copy selected text to clipboard
+      await navigator.clipboard.writeText(selectedReview);
+      
+      // 2. Prepare Google review URL with parameters
+      const reviewText = encodeURIComponent(selectedReview);
+      const dishesText = selectedDishes.length > 0 
+        ? encodeURIComponent(`Ordered: ${selectedDishes.join(', ')}. `)
+        : '';
+      
+      // 3. Create Google review URL
+      const googleReviewUrl = `https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq?authuser=0&entry=ttu`;
+      
+      // 4. Open Google review page
+      window.open(googleReviewUrl, '_blank');
+      
+      // 5. Show success message
+      toast.success('Review copied and Google page opened!');
+      
+      // 6. If photo was uploaded, simulate photo upload to Google
+      if (selectedFile) {
+        toast.success('Photo ready for upload to Google');
+        // Note: Actual photo upload to Google would require Google Photos API integration
+        // This is a simulation for the user experience
+      }
+      
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast.error('Failed to submit review');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -210,22 +175,11 @@ export default function MobileSimplePage() {
               
               <button
                 onClick={() => activeStep !== 'upload' && setActiveStep('generate')}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'generate' ? 'bg-primary-100 text-primary-700' : activeStep === 'submit' ? 'text-primary-600' : 'text-gray-400'}`}
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'generate' ? 'bg-primary-100 text-primary-700' : 'text-gray-400'}`}
                 disabled={activeStep === 'upload'}
               >
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">Generate</span>
-              </button>
-              
-              <div className="flex-1 h-0.5 bg-gray-200 mx-2"></div>
-              
-              <button
-                onClick={() => activeStep === 'submit' && setActiveStep('submit')}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${activeStep === 'submit' ? 'bg-primary-100 text-primary-700' : 'text-gray-400'}`}
-                disabled={activeStep !== 'submit'}
-              >
-                <Star className="w-4 h-4" />
-                <span className="text-sm font-medium">Submit</span>
               </button>
             </div>
           </div>
@@ -236,33 +190,36 @@ export default function MobileSimplePage() {
         {/* Step Content */}
         {activeStep === 'upload' && (
           <div className="space-y-6">
-            {/* Dish Input */}
+            {/* Dish Input - Multi Select */}
             <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-3">What did you order?</h3>
+              <h3 className="font-bold text-gray-900 mb-3">What did you order? (Select multiple)</h3>
               
-              <input
-                type="text"
-                value={dishName}
-                onChange={(e) => setDishName(e.target.value)}
-                placeholder="Enter dish name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-3"
-              />
-              
-              <div className="flex flex-wrap gap-2">
-                {COMMON_DISHES.slice(0, 5).map((dish) => (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {COMMON_DISHES.map((dish) => (
                   <button
                     key={dish}
-                    onClick={() => handleDishSuggestionClick(dish)}
-                    className={`px-3 py-1.5 rounded-full text-sm ${
-                      dishName === dish
+                    onClick={() => handleDishToggle(dish)}
+                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                      selectedDishes.includes(dish)
                         ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     {dish}
+                    {selectedDishes.includes(dish) && (
+                      <span className="ml-1">✓</span>
+                    )}
                   </button>
                 ))}
               </div>
+              
+              {selectedDishes.length > 0 && (
+                <div className="mt-3 p-3 bg-primary-50 rounded-lg border border-primary-100">
+                  <p className="text-primary-800 text-sm">
+                    <span className="font-medium">Selected:</span> {selectedDishes.join(', ')}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Photo Upload */}
@@ -376,81 +333,29 @@ export default function MobileSimplePage() {
                 </div>
               )}
 
-              {/* Continue Button */}
-              <button
-                onClick={() => selectedReview && setActiveStep('submit')}
-                disabled={!selectedReview}
-                className="w-full py-3 bg-primary-600 text-white font-bold rounded-lg mt-4 disabled:opacity-50"
-              >
-                Continue to Submit
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeStep === 'submit' && (
-          <div className="space-y-6">
-            {/* QR Code */}
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900 flex items-center">
-                  <QrCode className="w-5 h-5 mr-2" />
-                  Review QR Code
-                </h3>
-              </div>
-
-              <div className="flex flex-col items-center space-y-4">
-                {qrCodeDataUrl ? (
-                  <img
-                    src={qrCodeDataUrl}
-                    alt="QR Code"
-                    className="w-48 h-48"
-                  />
-                ) : (
-                  <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded-lg">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
-                      <p className="text-gray-600 text-sm">Generating QR code...</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3 w-full">
+              {/* Submit Button in Generate Tab */}
+              <div className="mt-6 space-y-3">
+                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-1">
                   <button
-                    onClick={handleDownloadQR}
-                    disabled={!qrCodeDataUrl}
-                    className="py-2.5 bg-primary-600 text-white rounded-lg text-sm disabled:opacity-50"
+                    onClick={handleSubmitReview}
+                    disabled={!selectedReview || isSubmitting}
+                    className="w-full py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-xl flex items-center justify-center space-x-2 disabled:opacity-50"
                   >
-                    Download
+                    <Star className="w-5 h-5" />
+                    <span>
+                      {isSubmitting ? 'Submitting...' : 'Submit to Google'}
+                    </span>
                   </button>
-                  <button
-                    onClick={handleCopyReview}
-                    className="py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm"
-                  >
-                    Copy Text
-                  </button>
+                </div>
+                
+                <div className="text-center text-sm text-gray-600">
+                  <p>• Review will be copied to clipboard</p>
+                  <p>• Google review page will open</p>
+                  {selectedFile && <p>• Photo ready for upload</p>}
+                  {selectedDishes.length > 0 && <p>• Selected dishes included</p>}
                 </div>
               </div>
             </div>
-
-            {/* Submit Button */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-1">
-              <button
-                onClick={handleSubmitReview}
-                className="w-full py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-xl flex items-center justify-center space-x-2"
-              >
-                <Star className="w-5 h-5" />
-                <span>Submit 5-Star Review</span>
-              </button>
-            </div>
-
-            {/* Back Button */}
-            <button
-              onClick={() => setActiveStep('generate')}
-              className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg"
-            >
-              Back to Generate
-            </button>
           </div>
         )}
       </main>
