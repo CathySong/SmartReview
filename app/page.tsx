@@ -16,13 +16,21 @@ export default function Home() {
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoDescription, setPhotoDescription] = useState<string>('');
   const [dishName, setDishName] = useState<string>('');
+  const [isClient, setIsClient] = useState(false);
 
-  // Generate initial review URL
+  // Mark when component is mounted on client
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Generate initial review URL (client-side only)
+  useEffect(() => {
+    if (!isClient) return;
+    
     if (currentReview) {
       updateReviewUrl();
     }
-  }, [currentReview]);
+  }, [currentReview, isClient]);
 
   const updateReviewUrl = () => {
     const reviewData = {

@@ -23,24 +23,34 @@ export default function ReviewGenerator({
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+  const [isClient, setIsClient] = useState(false);
 
-  // Generate initial reviews on component mount
+  // Mark when component is mounted on client
   useEffect(() => {
-    // Use a small timeout to ensure component is mounted
+    setIsClient(true);
+  }, []);
+
+  // Generate initial reviews on component mount (client-side only)
+  useEffect(() => {
+    if (!isClient) return;
+    
+    // Use a small timeout to ensure component is fully mounted
     const timer = setTimeout(() => {
       generateNewReviews();
-    }, 100);
+    }, 300);
     
     return () => clearTimeout(timer);
-  }, [businessType]);
+  }, [businessType, isClient]);
 
-  // Initialize with empty reviews for better UX
+  // Initialize with empty reviews for better UX (client-side only)
   useEffect(() => {
+    if (!isClient) return;
+    
     if (reviews.length === 0) {
       // Show loading state
       setReviews(['Loading review options...', 'Please wait...', 'Generating AI reviews...']);
     }
-  }, []);
+  }, [isClient]);
 
   // Update word count when selected review changes
   useEffect(() => {

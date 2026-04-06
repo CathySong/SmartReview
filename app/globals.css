@@ -29,4 +29,50 @@
   .input-field {
     @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all;
   }
+
+  /* Mobile-specific styles */
+  .mobile-card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-5;
+  }
+  
+  .mobile-btn {
+    @apply py-3 px-4 rounded-lg font-medium transition-colors duration-200;
+  }
+  
+  .mobile-btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white;
+  }
+  
+  .mobile-btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700;
+  }
+  
+  .mobile-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-base;
+  }
+  
+  /* Prevent text selection on mobile */
+  .no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Better tap targets for mobile */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
