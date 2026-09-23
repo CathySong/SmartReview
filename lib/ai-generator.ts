@@ -1,17 +1,14 @@
 import OpenAI from 'openai';
 
-// Fallback reviews for Xie Bao Crab House (if OpenAI API is not available)
+// Fallback review prompts for Xie Bao Crab House (if OpenAI API is not available).
+// They are deliberately balanced instead of always glowing; customers should
+// edit the final text so it reflects their real experience.
 const FALLBACK_REVIEWS = [
-  "The crab was absolutely incredible - fresh, perfectly seasoned, and cooked to perfection. The service was attentive and the atmosphere was lively yet comfortable. Will definitely return!",
-  "Amazing seafood experience! The crab dishes were outstanding, the staff was knowledgeable about the menu, and the restaurant had a great vibe. Highly recommend the garlic crab!",
-  "What a fantastic crab house! The seafood was fresh and flavorful, the service was excellent, and the portions were generous. Can't wait to come back for more!",
-  "Exceptional Chinese seafood restaurant. Every dish we tried was delicious, especially the crab preparations. The staff made us feel welcome and the overall experience was memorable.",
-  "Loved everything about Xie Bao Crab House! The crab was cooked perfectly, the sauces were amazing, and the service was friendly and efficient. Great spot for seafood lovers!",
-  "Outstanding crab house! From the moment we walked in, the aroma was incredible. The food lived up to the smell - fresh, flavorful, and beautifully presented. Top-notch experience!",
-  "A hidden gem for seafood! The crab was fresh and delicious, the service was impeccable, and the restaurant had a great atmosphere. We'll definitely be regulars!",
-  "Perfect spot for crab lovers! The staff went above and beyond to make our visit special. Every crab dish was a delight - fresh, flavorful, and perfectly cooked.",
-  "Absolutely loved our dining experience! The seafood was fresh and creative, the service was friendly, and the ambiance was perfect for a family meal. Highly recommended!",
-  "One of the best seafood restaurants we've tried. The crab was exceptional, the other dishes were equally delicious, and the service made the experience wonderful."
+  "I visited Xie Bao Crab House and especially noticed the crab, service, and atmosphere. I would describe my experience as...",
+  "My meal at Xie Bao Crab House included seafood and Chinese dishes. The part I appreciated most was...",
+  "I tried Xie Bao Crab House recently. The food, service, and overall experience made me feel...",
+  "After eating at Xie Bao Crab House, I would tell another customer this about the visit...",
+  "My honest impression of Xie Bao Crab House is based on the dish I ordered, the service, and the atmosphere..."
 ];
 
 // Categories for AI to focus on (restaurant specific)
@@ -42,23 +39,12 @@ export class ReviewGenerator {
     // In Vercel, environment variables are available at runtime
     const key = apiKey || process.env.OPENAI_API_KEY;
     
-    console.log('OpenAI API Key check:', {
-      hasProvidedKey: !!apiKey,
-      hasEnvKey: !!process.env.OPENAI_API_KEY,
-      envKeyLength: process.env.OPENAI_API_KEY?.length || 0,
-      envKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 10) || 'none',
-      isVercel: !!process.env.VERCEL,
-      nodeEnv: process.env.NODE_ENV
-    });
-    
     if (key && key.startsWith('sk-')) {
       this.openai = new OpenAI({
         apiKey: key,
       });
-      console.log('OpenAI client initialized successfully');
-    } else {
+    } else if (process.env.NODE_ENV === 'development') {
       console.warn('OpenAI API key not configured or invalid. Using fallback reviews.');
-      console.warn('For Vercel deployment, make sure OPENAI_API_KEY is set in Environment Variables.');
     }
   }
 
@@ -69,9 +55,6 @@ export class ReviewGenerator {
   ): Promise<string> {
     // If OpenAI is not available, use fallback reviews
     if (!this.openai) {
-      console.log('OpenAI client not initialized, using fallback review');
-      console.log('This usually means OPENAI_API_KEY is not set in environment variables.');
-      console.log('For Vercel: Check Environment Variables in project settings.');
       return this.getRandomFallbackReview();
     }
 
@@ -79,20 +62,12 @@ export class ReviewGenerator {
       const category = this.getRandomCategory();
       const prompt = this.buildPrompt(businessType, category, dishName, photoDescription);
 
-      console.log('Generating AI review with context:', {
-        businessType,
-        dishName: dishName || 'none',
-        photoDescription: photoDescription || 'none',
-        category,
-        promptLength: prompt.length
-      });
-      
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that generates authentic, natural-sounding Google reviews for Xie Bao Crab House. Reviews should be 18-22 words, sound like real customer feedback, mention specific dishes or experiences, and avoid repetitive patterns."
+            content: "You help customers draft honest first-person review text based only on their real experience. Never guarantee a positive rating, never invent facts, and encourage the customer to edit before posting."
           },
           {
             role: "user",
@@ -106,13 +81,8 @@ export class ReviewGenerator {
       const review = completion.choices[0]?.message?.content?.trim();
       
       if (review && review.length > 15) {
-        console.log('AI review generated successfully:', {
-          wordCount: review.trim().split(/\s+/).length,
-          preview: review.substring(0, 50) + '...'
-        });
         return review;
       } else {
-        console.log('AI review too short or empty, using fallback');
         return this.getRandomFallbackReview();
       }
     } catch (error: any) {
@@ -122,7 +92,6 @@ export class ReviewGenerator {
         type: error.type,
         status: error.status
       });
-      console.log('Using fallback review due to API error');
       return this.getRandomFallbackReview();
     }
   }
@@ -143,19 +112,19 @@ export class ReviewGenerator {
       context += `Based on the photo showing: ${photoDescription}. `;
     }
     
-    return `Generate a natural, authentic Google review for Xie Bao Crab House, a seafood and Chinese restaurant. 
+    return `Draft a natural first-person Google review for Xie Bao Crab House, a seafood and Chinese restaurant.
     ${context}
     Focus on: ${category}.
     
     Requirements:
-    - 18-22 words exactly
-    - Sound like real customer feedback from a seafood restaurant
-    - Mention specific dishes like crab, seafood, or Chinese cuisine
-    - Include personal experience details
-    - Avoid generic phrases like "great service" or "good food"
-    - End with intention to return or recommend
-    
-    Example format: "The garlic crab was incredible - fresh, perfectly seasoned, and full of flavor. The staff was attentive and the restaurant had a great atmosphere. Will definitely be back!"`;
+    - 18-28 words
+    - Sound like real customer feedback
+    - Do not assume a 5-star rating
+    - Do not invent details not provided
+    - Use concrete sensory or service details when available
+    - Make it easy for the customer to edit before posting
+
+    Example style: "I tried the garlic crab and liked the seasoning and lively atmosphere. I would come back for seafood with friends."`;
   }
 
   private getRandomCategory(): string {

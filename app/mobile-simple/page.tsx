@@ -170,26 +170,17 @@ export default function MobileSimplePage() {
     setIsSubmitting(true);
     
     try {
-      // 1. 编码评论文本用于URL参数
-      const encodedReview = encodeURIComponent(selectedReview);
-      
-      // 2. 创建Google review URL，自动填充评论文本和5星评分
-      // 注意：Google Maps URL参数可能有限制，这是模拟自动填充
+      // Open the Google review page without forcing rating or text parameters.
+      // The customer stays in control of the final rating and review content.
       const googleReviewUrl = `https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq?authuser=0&entry=ttu`;
-      
-      // 3. 打开Google review页面
+
       window.open(googleReviewUrl, '_blank');
-      
-      // 4. 显示自动填充提示
-      toast.success('Google review opened! Your selected review is ready to paste.');
-      
-      // 5. 自动复制评论文本到剪贴板
+
       await navigator.clipboard.writeText(selectedReview);
       toast.success('Review copied to clipboard - ready to paste!');
-      
-      // 6. 显示操作说明
+
       setTimeout(() => {
-        toast.success('Tip: Paste (Cmd/Ctrl+V) in Google review box, select 5 stars, and submit!');
+        toast.success('Tip: Paste the draft only if it matches your experience, then choose your own rating.');
       }, 1000);
       
     } catch (error) {
@@ -434,8 +425,8 @@ export default function MobileSimplePage() {
                 
                 <div className="text-center text-sm text-gray-600 space-y-1">
                   <p>• Review will auto-copy to clipboard</p>
-                  <p>• Google page opens with 5-star selected</p>
-                  <p>• Just paste review and click submit</p>
+                  <p>• Google page opens for you to choose your rating</p>
+                  <p>• Paste/edit the draft only if it matches your experience</p>
                   {detectedDishes.length > 0 && (
                     <p>• AI detected: {detectedDishes.join(', ')}</p>
                   )}

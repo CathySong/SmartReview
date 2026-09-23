@@ -160,11 +160,11 @@ export default function QRCodeGenerator({ url, businessName, onRegenerate }: QRC
           </li>
           <li className="flex items-start">
             <span className="text-primary-600 mr-2">3.</span>
-            Review will open in Google Maps with 5 stars pre-filled
+            Google Maps will open to the business review page
           </li>
           <li className="flex items-start">
             <span className="text-primary-600 mr-2">4.</span>
-            Edit if needed, then click "Post" to submit
+            Choose your own rating, edit the text, then click "Post"
           </li>
         </ul>
       </div>

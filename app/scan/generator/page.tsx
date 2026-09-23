@@ -479,7 +479,7 @@ export default function GeneratorPage() {
                     </span>
                     <span className="text-sm text-gray-600 flex items-center">
                       <Star className="w-3 h-3 mr-1 text-yellow-400 fill-current" />
-                      5-star
+                      your rating
                     </span>
                   </div>
                 </div>

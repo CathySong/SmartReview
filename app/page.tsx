@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { QrCode, Sparkles, Shield, Zap, Star, Users, TrendingUp, Camera } from 'lucide-react';
+import { Camera, MessageSquare, QrCode, Shield, Sparkles, Star } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ReviewGenerator from '@/components/ReviewGenerator';
 import QRCodeGenerator from '@/components/QRCodeGenerator';
@@ -34,7 +34,6 @@ export default function Home() {
 
   const updateReviewUrl = () => {
     const reviewData = {
-      rating: 5,
       reviewText: currentReview,
       placeId: DEFAULT_BUSINESS.placeId,
       businessName: DEFAULT_BUSINESS.name,
@@ -80,7 +79,7 @@ export default function Home() {
 
     window.open(reviewUrl, '_blank', 'noopener,noreferrer');
     
-    toast.success('Opening Google Review page...');
+    toast.success('Opening Google Maps. Please choose your own rating before posting.');
     setIsSubmitting(false);
   };
 
@@ -103,19 +102,19 @@ export default function Home() {
     {
       icon: <Sparkles className="w-6 h-6" />,
       title: 'AI Review Generation',
-      description: '20-word personalized reviews based on context'
+      description: 'Personalized draft text based on customer context'
     },
     {
-      icon: <Zap className="w-6 h-6" />,
-      title: 'One-Click Google',
-      description: 'Direct submission to Google Maps with 5 stars'
+      icon: <MessageSquare className="w-6 h-6" />,
+      title: 'Customer-Controlled Posting',
+      description: 'Customer chooses the rating and edits before posting'
     }
   ];
 
   const stats = [
-    { label: 'Average Rating', value: '4.8★', icon: <Star className="w-5 h-5" /> },
-    { label: 'Review Increase', value: '300%', icon: <TrendingUp className="w-5 h-5" /> },
-    { label: 'User Satisfaction', value: '95%', icon: <Users className="w-5 h-5" /> },
+    { label: 'Policy Focus', value: 'Honest', icon: <Shield className="w-5 h-5" /> },
+    { label: 'Customer Control', value: '100%', icon: <MessageSquare className="w-5 h-5" /> },
+    { label: 'Review Destination', value: 'Google', icon: <Star className="w-5 h-5" /> },
   ];
 
   return (
@@ -123,10 +122,10 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          Boost <span className="text-primary-600">Xie Bao Crab House</span> Reviews
+          Help Customers Write Better <span className="text-primary-600">Google Reviews</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-          QR code scanning + AI-generated reviews + Direct to Google Maps = More 5-star reviews
+          QR access + optional AI writing help + customer-controlled posting for honest restaurant feedback.
         </p>
         
         <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -168,7 +167,7 @@ export default function Home() {
                 Step 1: Upload Photo or Enter Dish (Optional)
               </h2>
               <p className="text-gray-600">
-                Upload a photo of your meal or enter the dish name for personalized AI reviews.
+                Upload a photo of your meal or enter the dish name for a personalized review draft.
               </p>
             </div>
             
@@ -182,7 +181,7 @@ export default function Home() {
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Step 2: Generate Your Review</h2>
               <p className="text-gray-600">
-                AI creates authentic, 20-word reviews based on your photo or dish selection.
+                AI suggests editable review text based on the customer’s actual experience.
               </p>
             </div>
             
@@ -200,7 +199,7 @@ export default function Home() {
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Step 3: Submit Your Review</h2>
             <p className="text-gray-600">
-              Scan the QR code or click the button to submit your 5-star review directly to Google.
+              Open Google Maps, choose your own rating, edit the text, and post only if it reflects your experience.
             </p>
           </div>
 
@@ -221,7 +220,7 @@ export default function Home() {
             >
               <Star className="w-5 h-5" />
               <span>
-                {isSubmitting ? 'Opening Google Review...' : 'Submit 5-Star Review on Google'}
+                {isSubmitting ? 'Opening Google Maps...' : 'Open Google Review Page'}
               </span>
             </button>
           </div>
@@ -231,17 +230,17 @@ export default function Home() {
       {/* CTA Section */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Ready to Boost Xie Bao Crab House Reviews?
+          Ready to Collect More Honest Customer Feedback?
         </h2>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Generate QR codes for your restaurant and watch your Google ratings soar with authentic 5-star reviews.
+          Give customers a smoother path to Google Maps while keeping the final review honest and fully under their control.
         </p>
         <button
           onClick={handleSubmitReview}
           disabled={!currentReview}
           className="px-8 py-4 bg-primary-600 text-white font-bold text-lg rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
         >
-          Submit Review Now
+          Open Review Page
         </button>
       </div>
     </div>

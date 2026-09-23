@@ -52,7 +52,7 @@ export default function ScanLandingPage() {
     {
       icon: <CheckCircle className="w-8 h-8" />,
       title: 'Congratulations',
-      description: 'Thank you for your 5-star review!'
+      description: 'Thank you for sharing honest feedback!'
     }
   ];
 
@@ -339,7 +339,7 @@ export default function ScanLandingPage() {
               </div>
               <h3 className="font-bold text-lg mb-2">Easy Submission</h3>
               <p className="text-primary-200 text-sm">
-                One-click submission to Google Maps with pre-filled 5-star review
+                Opens Google Maps so customers choose their own rating and final text
               </p>
             </div>
           </div>

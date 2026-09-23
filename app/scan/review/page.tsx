@@ -159,7 +159,7 @@ export default function ReviewPage() {
   const stats = [
     { icon: <Clock className="w-5 h-5" />, label: 'Time to Submit', value: '30s' },
     { icon: <Users className="w-5 h-5" />, label: 'Success Rate', value: '98%' },
-    { icon: <TrendingUp className="w-5 h-5" />, label: 'Rating Boost', value: '+4.8★' },
+    { icon: <TrendingUp className="w-5 h-5" />, label: 'Customer Control', value: '100%' },
   ];
 
   return (
@@ -375,7 +375,7 @@ export default function ReviewPage() {
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-white mb-2">Ready to Submit Your Review?</h2>
               <p className="text-green-100">
-                Your 5-star review will be submitted directly to Google Maps
+                Google Maps will open so you can choose your own rating and post manually
               </p>
             </div>
 
@@ -398,7 +398,7 @@ export default function ReviewPage() {
               >
                 <Star className="w-6 h-6" />
                 <span>
-                  {submitting ? 'Submitting...' : 'Submit 5-Star Review to Google'}
+                  {submitting ? 'Opening...' : 'Open Google Review Page'}
                 </span>
                 <ChevronRight className="w-6 h-6" />
               </button>
