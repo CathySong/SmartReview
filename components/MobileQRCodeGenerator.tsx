@@ -267,7 +267,7 @@ export default function MobileQRCodeGenerator({ url, businessName, onRegenerate 
           </li>
           <li className="flex items-start">
             <span className="mr-2">4.</span>
-            <span>AI-generated review is pre-filled for easy submission</span>
+            <span>They choose their rating and can paste/edit their draft</span>
           </li>
         </ul>
       </div>

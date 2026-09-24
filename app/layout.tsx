@@ -6,8 +6,8 @@ import { Toaster } from 'react-hot-toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Xie Bao Crab House - Google Review Generator',
-  description: 'Scan QR code for Xie Bao Crab House, get AI-generated review, submit 5-star Google review directly',
+  title: 'Xie Bao Crab House - Customer Review Assistant',
+  description: 'Scan QR code for Xie Bao Crab House, draft an honest review, and open Google Maps to choose your own rating',
   keywords: ['Xie Bao Crab House', 'Google Reviews', 'QR Code', 'Seafood Restaurant', 'Chinese Cuisine'],
 }
 
@@ -32,7 +32,7 @@ export default function RootLayout({
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">Google Review Generator</span>
+                  <span className="text-sm text-gray-600">Customer Review Assistant</span>
                 </div>
               </div>
             </div>

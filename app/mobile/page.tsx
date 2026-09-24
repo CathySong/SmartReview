@@ -36,7 +36,6 @@ export default function MobileHome() {
 
   const updateReviewUrl = () => {
     const reviewData = {
-      rating: 5,
       reviewText: currentReview,
       placeId: DEFAULT_BUSINESS.placeId,
       businessName: DEFAULT_BUSINESS.name,
@@ -86,7 +85,7 @@ export default function MobileHome() {
 
     window.open(reviewUrl, '_blank', 'noopener,noreferrer');
     
-    toast.success('Opening Google Review page...');
+    toast.success('Opening Google Maps. Please choose your own rating.');
     setIsSubmitting(false);
   };
 
@@ -203,10 +202,10 @@ export default function MobileHome() {
         {/* Hero Section */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Boost <span className="text-primary-600">Xie Bao Crab House</span> Reviews
+            Help Customers Review <span className="text-primary-600">Xie Bao Crab House</span>
           </h1>
           <p className="text-gray-600 text-sm">
-            QR scan + AI reviews + Google Maps = More 5-star reviews
+            QR scan + editable review drafts + customer-controlled Google Maps posting
           </p>
           
           {/* Stats */}
@@ -326,7 +325,7 @@ export default function MobileHome() {
                   </button>
                   <h2 className="text-lg font-bold text-gray-900">Step 3: Submit Your Review</h2>
                   <p className="text-gray-600 text-sm mt-1">
-                    Scan QR code or click button to submit 5-star review to Google
+                    Open Google Maps, choose your own rating, edit the text, and post manually
                   </p>
                 </div>
               </div>
@@ -351,7 +350,7 @@ export default function MobileHome() {
                 >
                   <Star className="w-5 h-5" />
                   <span>
-                    {isSubmitting ? 'Opening Google...' : 'Submit 5-Star Review'}
+                    {isSubmitting ? 'Opening Google...' : 'Open Google Review Page'}
                   </span>
                 </button>
               </div>
@@ -379,10 +378,10 @@ export default function MobileHome() {
             {/* CTA Section */}
             <div className="text-center bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-3">
-                Ready to Boost Reviews?
+                Ready to Collect Honest Feedback?
               </h2>
               <p className="text-gray-600 text-sm mb-4">
-                Generate QR codes for your restaurant and watch your Google ratings soar.
+                Generate QR codes that make reviews easier without taking control away from customers.
               </p>
               <button
                 onClick={handleSubmitReview}

@@ -219,7 +219,7 @@ export default function ReviewGenerator({
                 </span>
                 <span className="text-sm text-gray-600 flex items-center">
                   <Star className="w-3 h-3 mr-1 text-yellow-400 fill-current" />
-                  5-star rating
+                  customer-chosen rating
                 </span>
               </div>
             </div>
@@ -275,6 +275,7 @@ export default function ReviewGenerator({
           <li>• Feel free to edit the text to add personal details</li>
           <li>• Keep reviews between 15-25 words for best engagement</li>
           <li>• Mention specific aspects like food, service, or atmosphere</li>
+          <li>• Choose your own rating in Google Maps before posting</li>
         </ul>
       </div>
     </div>

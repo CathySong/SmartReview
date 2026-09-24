@@ -2,46 +2,35 @@
  * Google Review Submission Utility
  * 
  * This module handles the generation of Google Review links and provides
- * a compliant way to direct users to submit reviews.
+ * a policy-conscious way to direct users to write their own reviews.
  * 
  * IMPORTANT: This tool follows Google's policies by:
  * 1. Not automating review submissions
  * 2. Not offering incentives for reviews
  * 3. Providing genuine customer experiences
- * 4. Allowing users to edit AI-generated content
+ * 4. Keeping rating and final text under the customer's control
  */
 
 export interface ReviewData {
-  rating: number; // 1-5 stars
-  reviewText: string;
+  reviewText?: string;
   placeId: string; // Google Place ID
   businessName: string;
 }
 
 export class GoogleReviewService {
   /**
-   * Generate Google Review URL for Xie Bao Crab House
-   * Uses the specific Google Maps URL provided
+   * Generate Google Review URL for Xie Bao Crab House.
+   *
+   * We intentionally do not append rating or review-text parameters. Review
+   * platforms can change unsupported query params at any time, and pre-filling
+   * positive ratings/text is risky from a policy and trust perspective.
    */
   static generateReviewUrl(data: ReviewData): string {
-    const { rating, reviewText } = data;
-    
-    // URL encode the review text
-    const encodedReview = encodeURIComponent(reviewText);
-    
     // Use the specific Xie Bao Crab House Google Maps URL
     // This is the exact URL that will open when users scan QR code
     const baseUrl = `https://www.google.com/maps/place/Xie+Bao+Crab+House/@40.5131462,-74.4085894,17z/data=!3m1!5s0x89c3c7df48f8a6a7:0x9199b8e50eabbc2a!4m8!3m7!1s0x89c3c7466ba52f2f:0xc487fc390524a986!8m2!3d40.5131462!4d-74.4060145!9m1!1b1!16s%2Fg%2F11vwz4qcrq`;
-    
-    // Add review parameters to the URL
-    const params = new URLSearchParams({
-      authuser: '0',
-      entry: 'ttu',
-      review: encodedReview,
-      rating: rating.toString(),
-    });
 
-    return `${baseUrl}?${params.toString()}`;
+    return baseUrl;
   }
 
   /**
@@ -145,9 +134,9 @@ export class GoogleReviewService {
     return [
       '1. Click the "Submit Review" button',
       '2. You will be redirected to Google Maps',
-      '3. Review will be pre-filled with 5 stars and your text',
-      '4. You can edit the review before submitting',
-      '5. Click "Post" to submit your review'
+      '3. Choose your own rating in Google Maps',
+      '4. Write or paste an honest review based on your actual experience',
+      '5. Click "Post" only when the review reflects your experience'
     ];
   }
 }

@@ -261,7 +261,7 @@ export default function MobileReviewGenerator({
                 </span>
                 <span className="text-sm text-gray-600 flex items-center">
                   <Star className="w-3 h-3 mr-1 text-yellow-400 fill-current" />
-                  5-star
+                  your rating
                 </span>
               </div>
             </div>
@@ -329,6 +329,10 @@ export default function MobileReviewGenerator({
           <li className="flex items-start">
             <span className="mr-2">•</span>
             <span>Feel free to edit the text to add personal details</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span>Choose your own rating in Google Maps before posting</span>
           </li>
         </ul>
       </div>
